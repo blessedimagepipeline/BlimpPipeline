@@ -1,0 +1,18 @@
+pool:
+    vmImage: 'ubuntu-latest' 
+steps:
+    - bash: |
+        docker login -u blimpacr -p $(acrPassword) blimpacr.azurecr.io
+        git clone $(gitURL)
+        cd $(repoName)
+        git fetch origin
+        git checkout origin/$(branchName)
+        if [[ "$(useCache)" -eq "True" ]]
+        then
+            docker build -t blimpacr.azurecr.io/$(imageTag) .
+        else
+            docker build --no-cache -t blimpacr.azurecr.io/$(imageTag) .
+        fi
+      timeoutInMinutes: 180
+    - script: docker push blimpacr.azurecr.io/$(imageTag)
+    
